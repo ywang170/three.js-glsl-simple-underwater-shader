@@ -1,0 +1,112 @@
+<html>
+	<head>
+		<title>Underwater shader</title>
+	</head>
+	<body>
+		<script src="js/three.min.js"></script>
+
+        <script src="myShader/vergil_water_shader.js"></script>
+
+        <script src="js/shaders/CopyShader.js"></script>
+        <script src="js/postprocessing/EffectComposer.js"></script>
+        <script src="js/postprocessing/RenderPass.js"></script>
+        <script src="js/postprocessing/MaskPass.js"></script>
+        <script src="js/postprocessing/ShaderPass.js"></script>
+
+		<div id="container"></div>
+		<script>
+			////////////////////////////////////setting//////////////////////////////////////////////
+			/*
+			global variables
+			*/
+			var scene;
+			var camera;
+			var renderer;
+			var day_light;
+			var ambient_light;
+			var composer;
+			var effect;
+
+			/*
+			init setting
+			*/
+			//init scene
+			scene = new THREE.Scene();
+
+			//init camera
+			camera = new THREE.PerspectiveCamera( 60, window.innerWidth/window.innerHeight, 0.1, 3000 );
+			camera.position.z = 50;
+			camera.position.y = 30;
+
+			
+
+			//init renderer
+			renderer = new THREE.WebGLRenderer();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			document.getElementById("container").appendChild( renderer.domElement );
+
+			//init light
+			day_light = new THREE.DirectionalLight(0xBBFFFF, 0.8);
+			day_light.position.set( 0.25, 1, -0.25 );
+			scene.add(day_light);
+			ambient_light = new THREE.AmbientLight(0x104E8B);
+			scene.add(ambient_light);
+
+			//init skybox
+			var textureLoader = new THREE.TextureLoader();
+			var texture0 = textureLoader.load( 'image/skybox/under_water/ft.jpg' );
+			var texture1 = textureLoader.load( 'image/skybox/under_water/bk.jpg' );
+			var texture2 = textureLoader.load( 'image/skybox/under_water/up.jpg' );
+			var texture3 = textureLoader.load( 'image/skybox/under_water/dn.jpg' );
+			var texture4 = textureLoader.load( 'image/skybox/under_water/rt.jpg' );
+			var texture5 = textureLoader.load( 'image/skybox/under_water/lf.jpg' );
+			var materials = [
+			    new THREE.MeshBasicMaterial( { map: texture0, side:THREE.BackSide, fog:false } ),
+			    new THREE.MeshBasicMaterial( { map: texture1, side:THREE.BackSide, fog:false } ),
+			    new THREE.MeshBasicMaterial( { map: texture2, side:THREE.BackSide, fog:false } ),
+			    new THREE.MeshBasicMaterial( { map: texture3, side:THREE.BackSide, fog:false } ),
+			    new THREE.MeshBasicMaterial( { map: texture4, side:THREE.BackSide, fog:false } ),
+			    new THREE.MeshBasicMaterial( { map: texture5, side:THREE.BackSide, fog:false } )
+			];
+			var faceMaterial = new THREE.MeshFaceMaterial( materials );
+			var geometry = new THREE.BoxGeometry( 2000, 2000, 2000 );
+			var skybox = new THREE.Mesh( geometry, faceMaterial );		 
+			scene.add(skybox);
+
+			/*
+			shader effect
+			*/
+			composer = new THREE.EffectComposer( renderer );
+            composer.addPass( new THREE.RenderPass( scene, camera ) );
+            effect = new THREE.ShaderPass( THREE.VergilWaterShader );
+            effect.renderToScreen = true;
+            composer.addPass( effect );
+
+            var box_geometry = new THREE.BoxGeometry( 5, 5, 5 );
+			var cubeMaterial = new THREE.MeshPhongMaterial();
+			var cube = new THREE.Mesh( box_geometry, cubeMaterial );
+			cube.position.x = -50;
+			cube.position.y = 50;
+			cube.position.z = 100;
+			scene.add(cube);
+			camera.lookAt(cube.position);
+
+			//////////////////////////////////// Loop ////////////////////////////////////////////
+			function render(){
+				//make sure the frame of render
+				requestAnimationFrame( render );
+
+				//change shader parameter
+				effect.uniforms['time'].value += 0.5;
+
+				cube.rotation.y += 0.01;
+
+				//render scene
+                composer.render();
+			};				
+			//run the function
+			render();
+
+		</script>
+	</body>
+</html>

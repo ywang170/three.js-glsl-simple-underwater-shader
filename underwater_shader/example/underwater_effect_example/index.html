@@ -1,0 +1,293 @@
+<html>
+	<head>
+		<title>Underwater shader</title>
+	</head>
+	<body>
+		<script src="js/three.min.js"></script>
+
+        <script src="myShader/vergil_water_shader.js"></script>
+
+        <script src="js/shaders/CopyShader.js"></script>
+        <script src="js/postprocessing/EffectComposer.js"></script>
+        <script src="js/postprocessing/RenderPass.js"></script>
+        <script src="js/postprocessing/MaskPass.js"></script>
+        <script src="js/postprocessing/ShaderPass.js"></script>
+
+		<div id="container"></div>
+		<script>
+			////////////////////////////////////setting//////////////////////////////////////////////
+			/*
+			global variables
+			*/
+			var scene;
+			var camera;
+			var renderer;
+			var day_light;
+			var ambient_light;
+			var mouse;
+			var currently_pressed_keys = {};
+			var composer;
+			var effect, effect2, effect3, effect4;
+
+			/*
+			init setting
+			*/
+			//init scene
+			scene = new THREE.Scene();
+
+			//init camera
+			camera = new THREE.PerspectiveCamera( 60, window.innerWidth/window.innerHeight, 0.1, 3000 );
+			camera.position.z = 50;
+			camera.position.y = 30;
+
+			camera.lookAt(new THREE.Vector3(100,150,100));
+
+			//init renderer
+			renderer = new THREE.WebGLRenderer();
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			document.getElementById("container").appendChild( renderer.domElement );
+
+			//init light
+			day_light = new THREE.DirectionalLight(0xBBFFFF, 0.8);
+			day_light.position.set( 0.25, 1, -0.25 );
+			scene.add(day_light);
+			ambient_light = new THREE.AmbientLight(0x104E8B);
+			scene.add(ambient_light);
+
+			//init skybox
+			var textureLoader = new THREE.TextureLoader();
+			var texture0 = textureLoader.load( 'image/skybox/under_water/ft.jpg' );
+			var texture1 = textureLoader.load( 'image/skybox/under_water/bk.jpg' );
+			var texture2 = textureLoader.load( 'image/skybox/under_water/up.jpg' );
+			var texture3 = textureLoader.load( 'image/skybox/under_water/dn.jpg' );
+			var texture4 = textureLoader.load( 'image/skybox/under_water/rt.jpg' );
+			var texture5 = textureLoader.load( 'image/skybox/under_water/lf.jpg' );
+			var materials = [
+			    new THREE.MeshBasicMaterial( { map: texture0, side:THREE.BackSide, fog:false } ),
+			    new THREE.MeshBasicMaterial( { map: texture1, side:THREE.BackSide, fog:false } ),
+			    new THREE.MeshBasicMaterial( { map: texture2, side:THREE.BackSide, fog:false } ),
+			    new THREE.MeshBasicMaterial( { map: texture3, side:THREE.BackSide, fog:false } ),
+			    new THREE.MeshBasicMaterial( { map: texture4, side:THREE.BackSide, fog:false } ),
+			    new THREE.MeshBasicMaterial( { map: texture5, side:THREE.BackSide, fog:false } )
+			];
+			var faceMaterial = new THREE.MeshFaceMaterial( materials );
+			var geometry = new THREE.BoxGeometry( 2000, 2000, 2000 );
+			var skybox = new THREE.Mesh( geometry, faceMaterial );		 
+			scene.add(skybox);
+
+			//init fog
+			scene.fog = new THREE.Fog(0x10388c, 1, 250);
+
+			//init mouse
+			mouse = new THREE.Vector2();
+
+			/*
+			key handle
+			*/
+			document.onkeydown = handleKeyDown;
+    		document.onkeyup = handleKeyUp;
+			function handleKeyDown(event) 
+			{
+				currently_pressed_keys[event.keyCode] = true;
+			}
+
+			function handleKeyUp(event) {
+				currently_pressed_keys[event.keyCode] = false;
+			}
+
+			/*
+			mouse handle
+			*/
+			var is_mouse_down = false;
+			var currentX = 0.0;
+			var currentY = 0.0;
+			var last_checkedX = 0.0;
+			var last_checkedY = 0.0;
+			document.onmousedown = function(event){
+				is_mouse_down = true;
+				currentX = event.clientX;
+				currentY = event.clientY;
+				last_checkedX = currentX;
+				last_checkedY = currentY;
+			}
+			document.onmouseup = function(event){
+				is_mouse_down = false;
+			}
+			document.onmousemove = function(event){
+				mouse.x = 2 * (event.clientX / window.innerWidth) - 1;
+                mouse.y = 1 - 2 * ( event.clientY / window.innerHeight );
+				if(is_mouse_down == false)
+				{
+					return
+				}
+				else
+				{
+					currentX = event.clientX;
+					currentY = event.clientY;
+					mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+					mouse.y = (event.clientY / window.innerHeight) * 2 - 1;
+				}
+			}
+
+			/*
+			shader effect
+			*/
+			composer = new THREE.EffectComposer( renderer );
+            composer.addPass( new THREE.RenderPass( scene, camera ) );
+
+            effect = new THREE.ShaderPass( THREE.VergilWaterShader );
+            effect.uniforms['centerX'].value = 0.8;
+            effect.uniforms['centerY'].value = 0.8;
+            composer.addPass( effect );
+            effect2 = new THREE.ShaderPass( THREE.VergilWaterShader );
+            effect2.uniforms['centerX'].value = 0.2;
+            effect2.uniforms['centerY'].value = 0.2;
+            composer.addPass( effect2 );
+            effect3 = new THREE.ShaderPass( THREE.VergilWaterShader );
+            effect3.uniforms['centerX'].value = 0.2;
+            effect3.uniforms['centerY'].value = 0.8;
+            composer.addPass( effect3 );
+            effect4 = new THREE.ShaderPass( THREE.VergilWaterShader );
+            effect4.uniforms['centerX'].value = 0.8;
+            effect4.uniforms['centerY'].value = 0.2;
+            effect4.renderToScreen = true;
+            composer.addPass( effect4 );
+
+			////////////////////////////////////technical helper funcs/////////////////////////////////
+			/*
+			function used for mouse rotate navigation
+			*/
+			function rotateAroundWorldAxis(object, axis, radians) {
+			    var q = new THREE.Quaternion();
+
+				q.setFromAxisAngle( axis, radians ); // axis must be normalized, angle in radians
+				object.quaternion.multiplyQuaternions( q, object.quaternion );
+			}
+
+			//////////////////////////////////// Scene building ///////////////////////////////////
+
+			//particles
+			var particles = new THREE.Geometry;
+			for (var p = 0; p < 8000; p++) {
+			    var particle = new THREE.Vector3(Math.random() * 2000 - 1000, Math.random() * 2000 - 1000, Math.random() * 2000 - 1000);
+			    particles.vertices.push(particle);
+			}
+			var particleTexture = new THREE.TextureLoader().load('image/twinkle2.png');
+			var particleMaterial = new THREE.ParticleBasicMaterial({ color: 0xeeeeee, map: particleTexture, size: 2 , transparent: true, blending:THREE.AdditiveBlending, fog:false});
+			var particleSystem = new THREE.ParticleSystem(particles, particleMaterial);
+ 			scene.add(particleSystem);
+
+ 			
+
+			//////////////////////////////////// Loop ////////////////////////////////////////////
+			function render(){
+				//make sure the frame of render
+				requestAnimationFrame( render );
+
+				//update camera by mouse
+				if(is_mouse_down)
+				{
+					var change_in_X = currentX - last_checkedX;
+					var change_in_Y = currentY - last_checkedY;
+					last_checkedX = currentX;
+					last_checkedY = currentY;
+					//camera.rotateOnAxis (new THREE.Vector3(0,1,0), -0.003 * change_in_X);
+					rotateAroundWorldAxis(camera, new THREE.Vector3(0,1,0), -0.002 * change_in_X)
+					camera.rotateOnAxis (new THREE.Vector3(1,0,0), -0.002 * change_in_Y);
+					//rotateAroundWorldAxis(camera, new THREE.Vector3(1,0,0), -0.003 * change_in_Y)
+				}
+
+				//update camera by key input
+				//up
+				if(currently_pressed_keys[38])
+				{
+					camera.rotateOnAxis (new THREE.Vector3(1,0,0), 0.015);
+					//camera.rotation.x += 0.01;
+				}
+				//left
+				if(currently_pressed_keys[37])
+				{
+					rotateAroundWorldAxis(camera, new THREE.Vector3(0,1,0), 0.015)
+				}
+				//down
+				if(currently_pressed_keys[40])
+				{
+					camera.rotateOnAxis (new THREE.Vector3(1,0,0), -0.015);
+					//camera.rotation.x -= 0.01;
+				}
+				//right
+				if(currently_pressed_keys[39])
+				{
+					rotateAroundWorldAxis(camera, new THREE.Vector3(0,1,0), -0.015)
+				}
+				//w
+				if(currently_pressed_keys[87])
+				{
+					camera.translateZ(-0.1);
+				}
+				//a
+				if(currently_pressed_keys[65])
+				{
+					camera.translateX(-0.1);
+				}
+				//s
+				if(currently_pressed_keys[83])
+				{
+					camera.translateZ(0.1);
+				}
+				//d
+				if(currently_pressed_keys[68])
+				{
+					camera.translateX(0.1);
+				}			
+
+				//roate particle
+				particleSystem.rotation.y += 0.0003;
+				var pCount = particles.length;
+				while (pCount--) {
+
+					// get the particle
+					var particle =
+					  particles.vertices[pCount];
+
+					// check if we need to reset
+					if (particle.position.y < -800) {
+					  particle.position.y = 800;
+					  particle.velocity.y = 0;
+					}
+				// update the velocity with
+				// a splat of randomniz
+				particle.velocity.y -= Math.random() *1;
+				// and the position
+				particle.position.addSelf(
+				  particle.velocity);
+				}
+				// flag to the particle system
+				// that we've changed its vertices.
+				particleSystem.geometry.__dirtyVertices = true;
+
+				//change shader parameter
+				effect.uniforms['time'].value += Math.random();
+				effect2.uniforms['time'].value += Math.random();
+				effect3.uniforms['time'].value += Math.random();
+				effect4.uniforms['time'].value += Math.random();
+
+				//render scene
+                composer.render();
+			};				
+			//run the function
+			render();
+
+			//////////////////////////////////// other html related func ////////////////////////////////////////
+			function setVolume(id, vol){
+				var myAudio = document.getElementById(id);  
+    			myAudio.volume = vol;
+			}
+
+		</script>
+		<audio id="water_sound" onloadeddata="setVolume('water_sound',0.2)" autoplay loop>
+		  <source src="sound/underwater.mp3" type="audio/mpeg">
+		  Your browser does not support the audio element.
+		</audio>
+	</body>
+</html>
