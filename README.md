@@ -9,7 +9,7 @@ This is a simple underwater effect shader written in glsl for three.js usage.
 5. MaskPass.js
 6. ShaderPass.js
 
-<h1>How to get there required files:</h1>
+<h1>How to get these required files:</h1>
 1. go to http://threejs.org/
 2. choose "download" on left menu
 3. extract downloaded file to get a folder named "three.js-master"
