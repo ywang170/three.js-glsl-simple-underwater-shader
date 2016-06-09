@@ -50,11 +50,11 @@ This is a simple underwater effect shader written in glsl for three.js usage.
             
 4. add these lines inside the main loop:
 
-    	effect.uniforms['time'].value += Math.random();
-	effect2.uniforms['time'].value += Math.random();
-	effect3.uniforms['time'].value += Math.random();
-	effect4.uniforms['time'].value += Math.random();
-    	composer.render();//this should replace "renderer.render()" in your previous
+	    	effect.uniforms['time'].value += Math.random();
+		effect2.uniforms['time'].value += Math.random();
+		effect3.uniforms['time'].value += Math.random();
+		effect4.uniforms['time'].value += Math.random();
+	    	composer.render();//this should replace "renderer.render()" in your previous
             
 <h1>Run examples</h1>
 1. Go to "underwater_shader/example/magnifier_effect_example" or "underwater_shader/example/underwater_effect_example"
