@@ -13,11 +13,11 @@ This is a simple underwater effect shader written in glsl for three.js usage.
 1. go to http://threejs.org/
 2. choose "download" on left menu
 3. extract downloaded file to get a folder named "three.js-master"
-4. you need there files:
-    three.js-master/build/three.js
-    three.js-master/example/js/shaders/CopyShader.js
-    three.js-master/examplejs/postprocessing/RenderPass.js
-    three.js-master/examplejs/postprocessing/MaskPass.js
+4. you will need there files:
+    three.js-master/build/three.js, 
+    three.js-master/example/js/shaders/CopyShader.js, 
+    three.js-master/examplejs/postprocessing/RenderPass.js, 
+    three.js-master/examplejs/postprocessing/MaskPass.js, 
     three.js-master/examplejs/postprocessing/ShaderPass.js
 
 <h1>How to use the shader:</h1>
