@@ -58,6 +58,7 @@ This is a simple underwater effect shader written in glsl for three.js usage.
             
 <h1>Run examples</h1>
 1. Go to "underwater_shader/example/magnifier_effect_example" or "underwater_shader/example/underwater_effect_example"
-2. run "index.html" using a web browser
+2. If you have a server or some IDE, you should run "index.html" on it( I personally run on xampp)
+3. If you DO NOT have a server, directly open "index.html" by any web browser. But when you render it all textures will be lost! So the final effect may not look good!
 
 
