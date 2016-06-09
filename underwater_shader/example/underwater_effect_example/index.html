@@ -40,8 +40,6 @@
 			camera.position.z = 50;
 			camera.position.y = 30;
 
-			camera.lookAt(new THREE.Vector3(100,150,100));
-
 			//init renderer
 			renderer = new THREE.WebGLRenderer();
 			renderer.setSize( window.innerWidth, window.innerHeight );
@@ -177,7 +175,70 @@
 			var particleSystem = new THREE.ParticleSystem(particles, particleMaterial);
  			scene.add(particleSystem);
 
- 			
+			var box_geometry = new THREE.BoxGeometry( 5, 5, 5 );
+			var cubeMaterial = new THREE.MeshPhongMaterial();
+			var cube = new THREE.Mesh( box_geometry, cubeMaterial );
+			cube.position.x = -50;
+			cube.position.y = 50;
+			cube.position.z = 100;
+			scene.add(cube);
+			camera.lookAt(cube.position); 	
+
+			cube = new THREE.Mesh( box_geometry, cubeMaterial );
+			cube.position.x = -45;
+			cube.position.y = 55;
+			cube.position.z = 120;
+			scene.add(cube);	
+
+			cube = new THREE.Mesh( box_geometry, cubeMaterial );
+			cube.position.x = -70;
+			cube.position.y = 40;
+			cube.position.z = 100;
+			scene.add(cube);
+
+			cube = new THREE.Mesh( box_geometry, cubeMaterial );
+			cube.position.x = -30;
+			cube.position.y = 30;
+			cube.position.z = 80;
+			scene.add(cube);
+
+			cube = new THREE.Mesh( box_geometry, cubeMaterial );
+			cube.position.x = -50;
+			cube.position.y = 80;
+			cube.position.z = 130;
+			scene.add(cube);
+
+			cube.position.x = -100;
+			cube.position.y = 100;
+			cube.position.z = 200;
+			scene.add(cube);
+			camera.lookAt(cube.position); 	
+
+			cube = new THREE.Mesh( box_geometry, cubeMaterial );
+			cube.position.x = -100;
+			cube.position.y = -100;
+			cube.position.z = 180;
+			scene.add(cube);	
+
+			cube = new THREE.Mesh( box_geometry, cubeMaterial );
+			cube.position.x = -70;
+			cube.position.y = 100;
+			cube.position.z = 100;
+			scene.add(cube);
+
+			cube = new THREE.Mesh( box_geometry, cubeMaterial );
+			cube.position.x = 100;
+			cube.position.y = 30;
+			cube.position.z = 80;
+			scene.add(cube);
+
+			cube = new THREE.Mesh( box_geometry, cubeMaterial );
+			cube.position.x = 120;
+			cube.position.y = 70;
+			cube.position.z = 130;
+			scene.add(cube);
+
+
 
 			//////////////////////////////////// Loop ////////////////////////////////////////////
 			function render(){
